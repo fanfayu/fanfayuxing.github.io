@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辛巴巴巴噜比啦</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial Black', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            cursor: none;
+            height: 100vh;
+            width: 100vw;
+            background-color: #660000;
+        }
+        
+        #main-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-color: transparent;
+        }
+      
+        
+        .popup {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            border: 8px solid #ff2222;
+            border-radius: 5px;
+            box-shadow: 0 0 50px #ff0000, inset 0 0 30px rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        .popup-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        
+        .scan-line {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to bottom, rgba(255, 0, 0, 0.9), transparent);
+            box-shadow: 0 0 15px 3px rgba(255, 0, 0, 0.8);
+            animation: scan 1.5s linear infinite;
+            z-index: 60;
+            pointer-events: none;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+        
+        #virus-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #ff6666;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 8px #ff0000;
+            z-index: 200;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            border: 3px solid #ff0000;
+        }
+        
+        #system-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff0000;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0000;
+            z-index: 300;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 4px solid #ff0000;
+            animation: alertPulse 1s infinite;
+        }
+        
+        @keyframes alertPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .glitch {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNmZjAwMDAiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==');
+            pointer-events: none;
+            z-index: 10;
+            animation: glitchEffect 0.5s infinite;
+        }
+        
+        @keyframes glitchEffect {
+            0% { opacity: 0.1; transform: translate(0); }
+            10% { opacity: 0.3; transform: translate(-3px, 3px); }
+            20% { opacity: 0.1; transform: translate(3px, -2px); }
+            30% { opacity: 0.3; transform: translate(-2px, 2px); }
+            40% { opacity: 0.1; transform: translate(2px, -3px); }
+            50% { opacity: 0.3; transform: translate(-1px, 1px); }
+            60% { opacity: 0.1; transform: translate(1px, -1px); }
+            70% { opacity: 0.3; transform: translate(-2px, 2px); }
+            80% { opacity: 0.1; transform: translate(2px, -2px); }
+            90% { opacity: 0.3; transform: translate(-1px, 1px); }
+            100% { opacity: 0.1; transform: translate(0); }
+        }
+        
+        .corruption {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 0, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 0, 0, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 5;
+            animation: corruptionMove 20s infinite linear;
+        }
+        
+        @keyframes corruptionMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+        
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景视频 -->
+    <video id="background-video" loop muted autoplay>
+        <source src="1.mp4" type="video/mp4">
+        您的浏览器不支持视频播放。
+    </video>
+    
+    <div id="main-container">
+        <div class="glitch"></div>
+        <div class="corruption"></div>
+        <div class="warning-overlay"></div>
+        <div class="scan-line"></div>
+        
+        <!-- 系统警报 -->
+        <div id="system-alert">辛巴巴巴噜比啦</div>
+        
+        <!-- 弹窗容器 -->
+        <div id="popup-container"></div>
+        
+        <!-- 病毒计数器 -->
+        <div id="virus-counter">辛巴巴巴噜比啦: <span id="virus-count">0</span></div>
+    </div>
+
+    <script>
+        // 视频列表（可以使用多个视频文件）
+        const videoFiles = ['1.mp4'];
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 播放背景视频
+            const bgVideo = document.getElementById('background-video');
+            bgVideo.play().catch(e => {
+                console.log("背景视频自动播放被阻止");
+                // 如果被阻止，设置静音播放
+                bgVideo.muted = true;
+                bgVideo.play();
+            });
+            
+            // 点击页面任何地方取消视频静音
+            document.body.addEventListener('click', function() {
+                bgVideo.muted = false;
+                bgVideo.play();
+            });
+            
+            // 开始无限生成弹窗
+            startInfinitePopups();
+            
+            // 更新病毒计数器
+            updateVirusCounter();
+            
+            // 模拟系统崩溃效果
+            simulateSystemCrash();
+        });
+        
+        // 弹窗内容数组
+        const popupTexts = [
+            "辛巴巴巴噜比啦",
+        ];
+        
+        let popupCount = 0;
+        let maxPopups = 500; // 初始最大弹窗数
+        let creationSpeed = 100; // 初始创建速度(ms)
+        let speedMultiplier = 1.0;
+        
+        // 开始无限生成弹窗
+        function startInfinitePopups() {
+            const container = document.getElementById('popup-container');
+            
+            // 初始创建一批弹窗
+            for (let i = 0; i < 15; i++) {
+                createSinglePopup(container);
+            }
+            
+            // 持续创建弹窗的间隔
+            const createInterval = setInterval(() => {
+                // 每10秒增加创建速度
+                if (popupCount % 100 === 0 && creationSpeed > 5) {
+                    creationSpeed = Math.max(5, creationSpeed * 0.7);
+                    speedMultiplier *= 1.2;
+                }
+                
+                // 创建多个弹窗来加速卡死
+                const batchSize = Math.min(8, Math.floor(popupCount / 80) + 1);
+                for (let i = 0; i < batchSize; i++) {
+                    createSinglePopup(container);
+                }
+                
+                // 如果弹窗数量过多，开始随机移除一些旧弹窗来制造闪烁效果
+                if (popupCount > 300) {
+                    const popups = document.querySelectorAll('.popup');
+                    if (popups.length > 250) {
+                        const randomIndex = Math.floor(Math.random() * popups.length);
+                        if (popups[randomIndex]) {
+                            popups[randomIndex].remove();
+                        }
+                    }
+                }
+            }, creationSpeed);
+            
+            // 逐渐增加弹窗移动速度
+            const speedUpInterval = setInterval(() => {
+                speedMultiplier *= 1.02;
+            }, 1000);
+        }
+        
+        // 创建单个弹窗
+        function createSinglePopup(container) {
+            if (popupCount > maxPopups && Math.random() > 0.3) {
+                return; // 达到上限后随机跳过一些创建
+            }
+            
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            
+            // 随机位置
+            const x = Math.random() * (window.innerWidth - 600);
+            const y = Math.random() * (window.innerHeight - 400);
+            
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            
+            // 随机大小变化
+            const sizeMultiplier = 0.6 + Math.random() * 0.8;
+            popup.style.width = `${600 * sizeMultiplier}px`;
+            popup.style.height = `${400 * sizeMultiplier}px`;
+            
+            // 为弹窗创建视频背景
+            const video = document.createElement('video');
+            video.className = 'popup-video';
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = false;
+            
+            // 随机选择视频文件
+            const videoFile = videoFiles[Math.floor(Math.random() * videoFiles.length)];
+            const source = document.createElement('source');
+            source.src = videoFile;
+            source.type = 'video/mp4';
+            video.appendChild(source);
+            
+            // 尝试播放视频
+            video.play().catch(e => {
+                console.log("弹窗视频播放失败:", e);
+                video.muted = true;
+                video.play();
+            });
+            
+            // 随机文本
+            const textIndex = Math.floor(Math.random() * popupTexts.length);
+            const popupContent = document.createElement('div');
+            popupContent.className = 'popup-content';
+            popupContent.textContent = popupTexts[textIndex];
+            
+            // 随机字体大小
+            const fontSize = 30 + Math.random() * 60;
+            popupContent.style.fontSize = `${fontSize}px`;
+            
+            // 随机文字颜色
+            const colorVariation = Math.floor(Math.random() * 100);
+            popupContent.style.color = `rgb(255, ${200 - colorVariation}, ${200 - colorVariation})`;
+            
+            // 随机背景透明度
+            popupContent.style.backgroundColor = `rgba(160, 0, 0, ${0.4 + Math.random() * 0.4})`;
+            
+            popup.appendChild(video);
+            popup.appendChild(popupContent);
+            container.appendChild(popup);
+            popupCount++;
+            
+            // 设置弹窗移动
+            movePopup(popup);
+            
+            // 更新病毒计数器
+            updateVirusCounter();
+        }
+        
+        // 移动弹窗
+        function movePopup(popup) {
+            let x = parseFloat(popup.style.left) || 0;
+            let y = parseFloat(popup.style.top) || 0;
+            
+            // 随机速度，乘以速度倍增器
+            let speedX = (Math.random() * 8 + 4) * (Math.random() > 0.5 ? 1 : -1) * speedMultiplier;
+            let speedY = (Math.random() * 8 + 4) * (Math.random() > 0.5 ? 1 : -1) * speedMultiplier;
+            
+            function animate() {
+                // 更新位置
+                x += speedX;
+                y += speedY;
+                
+                // 边界检测和反弹
+                const popupWidth = popup.offsetWidth;
+                const popupHeight = popup.offsetHeight;
+                
+                if (x <= 0 || x >= window.innerWidth - popupWidth) {
+                    speedX = -speedX * (0.9 + Math.random() * 0.2);
+                    x = x <= 0 ? 0 : window.innerWidth - popupWidth;
+                }
+                
+                if (y <= 0 || y >= window.innerHeight - popupHeight) {
+                    speedY = -speedY * (0.9 + Math.random() * 0.2);
+                    y = y <= 0 ? 0 : window.innerHeight - popupHeight;
+                }
+                
+                popup.style.left = `${x}px`;
+                popup.style.top = `${y}px`;
+                
+                // 随机改变边框颜色
+                if (Math.random() > 0.9) {
+                    popup.style.borderColor = `rgb(255, ${Math.random() * 150}, ${Math.random() * 150})`;
+                    popup.style.boxShadow = `0 0 ${30 + Math.random() * 40}px rgb(255, ${Math.random() * 100}, ${Math.random() * 100})`;
+                }
+                
+                // 随机改变透明度制造闪烁效果
+                if (Math.random() > 0.95) {
+                    popup.style.opacity = 0.7 + Math.random() * 0.3;
+                }
+                
+                // 随机缩放效果
+                if (Math.random() > 0.98) {
+                    const scale = 0.9 + Math.random() * 0.2;
+                    popup.style.transform = `scale(${scale})`;
+                }
+                
+                // 继续动画
+                requestAnimationFrame(animate);
+            }
+            
+            // 开始动画
+            animate();
+        }
+        
+        // 更新病毒计数器
+        function updateVirusCounter() {
+            const currentCount = document.querySelectorAll('.popup').length;
+            document.getElementById('virus-count').textContent = currentCount;
+            
+            // 随机增加一些数字跳动效果
+            if (Math.random() > 0.3) {
+                const randomIncrement = Math.floor(Math.random() * 15);
+                document.getElementById('virus-count').textContent = currentCount + randomIncrement;
+                
+                // 0.3秒后恢复实际值
+                setTimeout(() => {
+                    document.getElementById('virus-count').textContent = document.querySelectorAll('.popup').length;
+                }, 300);
+            }
+        }
+        
+        // 模拟系统崩溃效果
+        function simulateSystemCrash() {
+            // 逐渐增加闪烁速度
+            setInterval(() => {
+                const container = document.getElementById('main-container');
+                const currentAnimation = getComputedStyle(container).animationDuration;
+                const currentSpeed = parseFloat(currentAnimation) || 0.5;
+                if (currentSpeed > 0.1) {
+                    container.style.animationDuration = `${currentSpeed * 0.95}s`;
+                }
+            }, 2000);
+            
+            // 随机添加和删除元素制造闪烁
+            setInterval(() => {
+                if (Math.random() > 0.6) {
+                    const flash = document.createElement('div');
+                    flash.style.position = 'fixed';
+                    flash.style.top = '0';
+                    flash.style.left = '0';
+                    flash.style.width = '100%';
+                    flash.style.height = '100%';
+                    flash.style.backgroundColor = 'white';
+                    flash.style.opacity = '0.4';
+                    flash.style.zIndex = '999';
+                    flash.style.pointerEvents = 'none';
+                    document.body.appendChild(flash);
+                    
+                    setTimeout(() => {
+                        if (flash.parentNode) {
+                            flash.parentNode.removeChild(flash);
+                        }
+                    }, 30);
+                }
+            }, 300);
+            
+            // 随机改变页面标题
+            setInterval(() => {
+                const titles = [
+                    "辛巴巴巴噜比啦",
+                ];
+                document.title = titles[Math.floor(Math.random() * titles.length)];
+            }, 1500);
+            
+            // 随机改变系统警报文字
+            setInterval(() => {
+                const alerts = [
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦",
+                    "辛巴巴巴噜比啦"
+                ];
+                const alertElement = document.getElementById('system-alert');
+                alertElement.textContent = alerts[Math.floor(Math.random() * alerts.length)];
+            }, 2500);
+            
+            // 随机调整背景视频音量
+            setInterval(() => {
+                const bgVideo = document.getElementById('background-video');
+                if (!bgVideo.muted && Math.random() > 0.7) {
+                    bgVideo.volume = 0.2 + Math.random() * 0.8;
+                }
+            }, 3000);
+        }
+        
+        // 防止右键菜单
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            // 创建警告弹窗
+            const warning = document.createElement('div');
+            warning.style.position = 'fixed';
+            warning.style.top = '50%';
+            warning.style.left = '50%';
+            warning.style.transform = 'translate(-50%, -50%)';
+            warning.style.backgroundColor = '#ff0000';
+            warning.style.color = 'white';
+            warning.style.padding = '30px';
+            warning.style.fontSize = '32px';
+            warning.style.fontWeight = 'bold';
+            warning.style.zIndex = '10000';
+            warning.style.border = '8px solid #ff6666';
+            warning.style.boxShadow = '0 0 50px red';
+            warning.textContent = '辛巴巴巴噜比啦';
+            document.body.appendChild(warning);
+            
+            setTimeout(() => {
+                if (warning.parentNode) {
+                    warning.parentNode.removeChild(warning);
+                }
+            }, 1000);
+            return false;
+        });
+        
+        // 防止键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            // 阻止F12、Ctrl+Shift+I等开发者工具快捷键
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || 
+                (e.ctrlKey && e.keyCode === 85) || (e.ctrlKey && e.keyCode === 83)) {
+                e.preventDefault();
+                
+                // 创建键盘警告
+                const keyWarning = document.createElement('div');
+                keyWarning.style.position = 'fixed';
+                keyWarning.style.top = '50%';
+                keyWarning.style.left = '50%';
+                keyWarning.style.transform = 'translate(-50%, -50%)';
+                keyWarning.style.backgroundColor = '#990000';
+                keyWarning.style.color = '#ff9999';
+                keyWarning.style.padding = '40px';
+                keyWarning.style.fontSize = '40px';
+                keyWarning.style.fontWeight = 'bold';
+                keyWarning.style.zIndex = '10000';
+                keyWarning.style.border = '10px solid #ff3333';
+                keyWarning.style.boxShadow = '0 0 80px #ff0000';
+                keyWarning.textContent = '辛巴巴巴噜比啦';
+                document.body.appendChild(keyWarning);
+                
+                setTimeout(() => {
+                    if (keyWarning.parentNode) {
+                        keyWarning.parentNode.removeChild(keyWarning);
+                    }
+                }, 1500);
+                return false;
+            }
+            
+            // 阻止刷新
+            if (e.keyCode === 116 || (e.ctrlKey && e.keyCode === 82)) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // 空格键切换所有视频静音状态
+            if (e.keyCode === 32) {
+                e.preventDefault();
+                const videos = document.querySelectorAll('video');
+                videos.forEach(video => {
+                    video.muted = !video.muted;
+                });
+                
+                // 显示静音状态提示
+                const muteMsg = document.createElement('div');
+                muteMsg.style.position = 'fixed';
+                muteMsg.style.top = '20px';
+                muteMsg.style.right = '20px';
+                muteMsg.style.backgroundColor = '#990000';
+                muteMsg.style.color = '#ff9999';
+                muteMsg.style.padding = '15px';
+                muteMsg.style.fontSize = '20px';
+                muteMsg.style.fontWeight = 'bold';
+                muteMsg.style.zIndex = '10000';
+                muteMsg.style.border = '4px solid #ff3333';
+                muteMsg.style.boxShadow = '0 0 20px #ff0000';
+                muteMsg.textContent = videos[0].muted ? '辛巴巴巴噜比啦' : '辛巴巴巴噜比啦';
+                document.body.appendChild(muteMsg);
+                
+                setTimeout(() => {
+                    if (muteMsg.parentNode) {
+                        muteMsg.parentNode.removeChild(muteMsg);
+                    }
+                }, 1500);
+                return false;
+            }
+        });
+        
+        // 防止页面离开
+        window.onbeforeunload = function() {
+            return "辛巴巴巴噜比啦";
+        };
+        
+        // 禁用选择和拖动
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>
